@@ -1,7 +1,7 @@
 package android.examples.org.gmapview;
 
 /**
- This code is based on the code that is described at the following location
+ This code is based on code that is described at the following location
  http://javazerosign.blogspot.co.uk/2013/11/google-map-v3-for-android-devices.html
  */
 
