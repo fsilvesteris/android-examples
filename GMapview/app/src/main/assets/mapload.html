@@ -11,14 +11,16 @@ var map;  function initialize()
 window.android.showToast("inside");
 var latitude = 51.48;  
 var longitude = 0;
+var zoomLevel = 14;
 
 if (window.android){      
     latitude = window.android.getLatitude();      
     longitude = window.android.getLongitude();
-}
+    zoomLevel = window.android.getZoomLevel();
+    }
 
 var myLatLng = new google.maps.LatLng(latitude,longitude);    
-var myOptions = {zoom: 14, center: myLatLng, mapTypeId: google.maps.MapTypeId.ROADMAP}
+var myOptions = {zoom: zoomLevel, center: myLatLng, mapTypeId: google.maps.MapTypeId.ROADMAP}
 
 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 

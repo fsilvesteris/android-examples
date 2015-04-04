@@ -29,6 +29,8 @@ public class GMapview extends Activity implements LocationListener {
     private static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 0; // in Meters
     private static final long MINIMUM_TIME_BETWEEN_UPDATES = 0; // in Milliseconds
 
+    private int zoomLevel=16;
+
     protected LocationManager locationManager;
 
     @Override
@@ -118,6 +120,17 @@ public class GMapview extends Activity implements LocationListener {
     }
 
 
+    /**
+     * call this method to initialise the zoom level - note this is just a setter - does not cause the map to update
+     * https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels
+     * @param value - zoomlevel, between 0 and 21
+     */
+    protected void setZoomLevel(int value)
+    {
+        zoomLevel=Math.min(22,Math.max(0,value));
+    }
+
+
     public class ScriptINTF {
         private final Context mContext;
 
@@ -139,6 +152,12 @@ public class GMapview extends Activity implements LocationListener {
         public double getLongitude() {
 
             return mostRecentLocation.getLongitude();
+        }
+
+        @JavascriptInterface
+        public int getZoomLevel()
+        {
+            return zoomLevel;
         }
 
         @JavascriptInterface
