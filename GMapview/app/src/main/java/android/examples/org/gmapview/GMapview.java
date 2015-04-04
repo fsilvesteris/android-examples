@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -29,7 +30,7 @@ public class GMapview extends Activity implements LocationListener {
     private static final long MINIMUM_DISTANCE_CHANGE_FOR_UPDATES = 0; // in Meters
     private static final long MINIMUM_TIME_BETWEEN_UPDATES = 0; // in Milliseconds
 
-    private int zoomLevel=16;
+    private int zoomLevel = 16;
 
     protected LocationManager locationManager;
 
@@ -55,7 +56,7 @@ public class GMapview extends Activity implements LocationListener {
     private void setupWebView() {
 
         WebView webView = (WebView) findViewById(R.id.webview);
-        webView.addJavascriptInterface(new ScriptINTF(this), "android");
+        webView.addJavascriptInterface(this, "android");
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().getBuiltInZoomControls();
         webView.getSettings().setBuiltInZoomControls(true);
@@ -87,8 +88,11 @@ public class GMapview extends Activity implements LocationListener {
     }
 
     private void showLocation(String locationName, Location location) {
-        String message = (location != null) ? String.format("%1s Location \n Longitude: %2$s \n Latitude: %3$s", locationName, location.getLongitude(), location.getLatitude()) : "null";
-        makeText(this, message, LENGTH_LONG).show();
+        makeText(this, formatLocation(locationName, location), LENGTH_LONG).show();
+    }
+
+    private String formatLocation(String locationName, Location location) {
+        return location != null ? formatLocation(locationName, location.getLatitude(), location.getLongitude()) : formatLocation(locationName, null, null);
     }
 
 
@@ -123,52 +127,60 @@ public class GMapview extends Activity implements LocationListener {
     /**
      * call this method to initialise the zoom level - note this is just a setter - does not cause the map to update
      * https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels
+     *
      * @param value - zoomlevel, between 0 and 21
      */
-    protected void setZoomLevel(int value)
-    {
-        zoomLevel=Math.min(22,Math.max(0,value));
+    protected void setZoomLevel(int value) {
+        zoomLevel = Math.min(22, Math.max(0, value));
+    }
+
+    @JavascriptInterface
+    public double getLatitude() {
+
+        return mostRecentLocation.getLatitude();
+    }
+
+    @JavascriptInterface
+    public double getLongitude() {
+
+        return mostRecentLocation.getLongitude();
+    }
+
+    @JavascriptInterface
+    public int getZoomLevel() {
+        return zoomLevel;
+    }
+
+    @JavascriptInterface
+    public void showToast(String toast) {
+        makeText(this, toast, LENGTH_SHORT).show();
     }
 
 
-    public class ScriptINTF {
-        private final Context mContext;
-
-        /**
-         * Instantiate the interface and set the context
-         */
-        private ScriptINTF(Context c) {
-
-            mContext = c;
+    /**
+     * for details on  String.format options, refer to http://docs.oracle.com/javase/1.5.0/docs/api/java/util/Formatter.html#syntax
+     *
+     * @param locationName - location prefix
+     * @param latitude     - latitude
+     * @param longitude    - longitude
+     * @return - formatted text
+     */
+    private String formatLocation(String locationName, Double latitude, Double longitude) {
+        if ((latitude != null && longitude != null)) {
+            return String.format("%1s Location %2$s, %3$s", locationName, latitude, longitude);
         }
-
-        @JavascriptInterface
-        public double getLatitude() {
-
-            return mostRecentLocation.getLatitude();
-        }
-
-        @JavascriptInterface
-        public double getLongitude() {
-
-            return mostRecentLocation.getLongitude();
-        }
-
-        @JavascriptInterface
-        public int getZoomLevel()
-        {
-            return zoomLevel;
-        }
-
-        @JavascriptInterface
-        public void showToast(String toast) {
-            makeText(mContext, toast, LENGTH_SHORT).show();
-        }
-
-        @JavascriptInterface
-        public void showloc(double lat, double lng) {
-            //whilst this method is empty right now, it is referenced in the javascript
-        }
-
+        return locationName + " Location - Unknown";
     }
+
+    /**
+    https://developers.google.com/maps/documentation/javascript/examples/event-simple
+    https://developers.google.com/maps/documentation/javascript/reference?csw=1#event
+    */
+    @JavascriptInterface
+    public void mapEvent(String event, double latitude, double longitude, int zoom) {
+        String message = formatLocation(event, latitude, longitude) + " zoom: " + zoom;
+        Log.i("MAP_EVENT", message);
+        setZoomLevel(zoom);
+    }
+
 }
