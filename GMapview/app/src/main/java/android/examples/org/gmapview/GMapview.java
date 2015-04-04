@@ -8,6 +8,7 @@ package android.examples.org.gmapview;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,6 +25,10 @@ import static android.widget.Toast.makeText;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class GMapview extends Activity implements LocationListener {
+
+    //private static final Integer SCREEN_ORIENTATION=null;
+    //private static final Integer screenOrientation=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    private static final Integer SCREEN_ORIENTATION=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
     private Location mostRecentLocation;
 
@@ -44,24 +49,23 @@ public class GMapview extends Activity implements LocationListener {
 
         showCurrentLocation();
 
-        setupWebView();
-        //this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //force screen orientation
+        if(SCREEN_ORIENTATION != null) {
+            setRequestedOrientation(SCREEN_ORIENTATION);
+        }
 
-    }
-
-    /**
-     * Sets up the WebView object and loads the URL of the page *
-     */
-    // @SuppressLint(R.string.setjavascriptenabled)
-    private void setupWebView() {
-
-        WebView webView = (WebView) findViewById(R.id.webview);
-        webView.addJavascriptInterface(this, "android");
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().getBuiltInZoomControls();
-        webView.getSettings().setBuiltInZoomControls(true);
-
-        webView.loadUrl("file:///android_asset/mapload.html");
+        try {
+            Log.i("MAP_EVENT", "setupWebView");
+            WebView webView = (WebView) findViewById(R.id.webview);
+            webView.addJavascriptInterface(this, "android");
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.getSettings().getBuiltInZoomControls();
+            webView.getSettings().setBuiltInZoomControls(true);
+            webView.loadUrl("file:///android_asset/mapload.html");
+        }catch(Exception e)
+        {
+            Log.e("MAP_EVENT","setupWebView: "+e.getMessage());
+        }
     }
 
     @Override
