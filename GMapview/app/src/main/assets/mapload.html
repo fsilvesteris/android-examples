@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="theme.css">
+    <script type="text/javascript"
+            src="http://maps.googleapis.com/maps/api/js?&sensor=true"></script>
+    <script type="text/javascript">
+var map;  function initialize() {
+
+window.android.showToast("inside");
+var latitude = 0;  
+var longitude = 0;  
+if (window.android){      
+    latitude = window.android.getLatitude();      
+    longitude = window.android.getLongitude();    
+    }    
+var myLatLng = new google.maps.LatLng(latitude,longitude);    
+var myOptions = {      
+        zoom: 14,      
+        center: myLatLng,      
+        mapTypeId: google.maps.MapTypeId.ROADMAP  
+
+        }    
+map = new google.maps.Map(document.getElementById("map_canvas"),      myOptions); 
+ google.maps.event.addListener(map, 'click', function(e) {
+  window.android.showToast("clicks"+e.latLng);
+  var lat = e.latLng.lat();
+    var lng = e.latLng.lng();
+    window.android.showloc(lat,lng);
+        });
+}
+function centerAt(latitude, longitude){  
+    myLatlng = new google.maps.LatLng(latitude,longitude);  
+    map.panTo(myLatLng);
+    }
+
+
+    </script>
+    <title>Location Toaster</title>
+</head>
+<body>
+<body>
+<div id="map_canvas" style="height: 700px;"></div>
+<script type="text/javascript">initialize();</script>
+</body>
+</body>
+
+</html>
+
