@@ -2,36 +2,46 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+    <style>
+        html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+        }
+        #footer {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        margin-left: -180px;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        }
+    </style>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <link rel="stylesheet" type="text/css" href="theme.css">
+    <!--<link rel="stylesheet" type="text/css" href="theme.css">-->
     <script type="text/javascript"
             src="http://maps.googleapis.com/maps/api/js?&sensor=true"></script>
     <script type="text/javascript">
-var map;  function initialize() 
-{
-
-window.android.showToast("inside");
-var latitude = 51.48;  
+var poly;
+var geodesicPoly;
+var marker1;
+var marker2;
+//var map;
+function initialize() {
+//window.android.showToast("inside");
+var latitude = 51.48;
 var longitude = 0;
 var zoomLevel = 14;
-
-if (window.android){      
-    latitude = window.android.getLatitude();      
+if (window.android){
+    latitude = window.android.getLatitude();
     longitude = window.android.getLongitude();
     zoomLevel = window.android.getZoomLevel();
     }
-
-var myLatLng = new google.maps.LatLng(latitude,longitude);    
+var myLatLng = new google.maps.LatLng(latitude,longitude);
 var myOptions = {zoom: zoomLevel, center: myLatLng, mapTypeId: google.maps.MapTypeId.ROADMAP}
-
-map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-
-
-/*
-for additional events, refer to
-https://developers.google.com/maps/documentation/javascript/examples/event-simple
-https://developers.google.com/maps/documentation/javascript/reference?csw=1#event
-*/
+var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 
  google.maps.event.addListener(map, 'click',
  function(e)
@@ -39,47 +49,86 @@ https://developers.google.com/maps/documentation/javascript/reference?csw=1#even
       var latLng=e.latLng;
       callMapEvent('click', latLng.lat(), latLng.lng(), map.getZoom());
   });
-
-
  google.maps.event.addListener(map, 'center_changed',
  function()
   {
   var latLng=map.getCenter()
   callMapEvent('center_changed', latLng.lat(), latLng.lng(), map.getZoom());
   });
-
  google.maps.event.addListener(map, 'zoom_changed',
  function()
  {
   var latLng=map.getCenter()
   callMapEvent('zoom_changed', latLng.lat(), latLng.lng(), map.getZoom());
   });
+   marker1 = new google.maps.Marker({
+    position: map.getCenter(),
+    map: map,
+	draggable: true
+  });
+   marker2 = new google.maps.Marker({
+    position: map.getCenter(),
+    map: map,
+  });
+  var bounds = new google.maps.LatLngBounds(marker1.getPosition(),
+      marker2.getPosition());
+  map.fitBounds(bounds);
+
+  google.maps.event.addListener(marker1, 'position_changed', update);
+  google.maps.event.addListener(marker2, 'position_changed', update);
+
+  var polyOptions = {
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 3,
+    map: map,
+  };
+  poly = new google.maps.Polyline(polyOptions);
+
+  var geodesicOptions = {
+    strokeColor: '#CC0099',
+    strokeOpacity: 1.0,
+    strokeWeight: 3,
+    geodesic: true,
+    map: map
+  };
+  geodesicPoly = new google.maps.Polyline(geodesicOptions);
+
+  update();
+
 }
+function update() {
+  var path = [marker1.getPosition(), marker2.getPosition()];
+  poly.setPath(path);
+  geodesicPoly.setPath(path);
+  var heading = google.maps.geometry.spherical.computeDistanceBetween(path[0],
+      path[1]);
+  document.getElementById('heading').value = heading;
+  document.getElementById('origin').value = path[0].toString();
+  document.getElementById('destination').value = path[1].toString();
+}
+
 
 function callMapEvent(event, latitude, longitude, zoom)
 {
 if (window.android){
   window.android.mapEvent(event, latitude, longitude, zoom);
 }
-
 }
-
-
-
-/*
-redundant code
-function centerAt(latitude, longitude){ myLatlng = new google.maps.LatLng(latitude,longitude); map.panTo(myLatLng); }
-*/
-
+google.maps.event.addDomListener(window, 'load', initialize);
     </script>
     <title>Location Toaster</title>
 </head>
 <body>
 <body>
 <div id="map_canvas" style="height: 700px;"></div>
+<div id="footer" style="center">
+    Origin: <input type="text" readonly id="origin">
+    Destination: <input type="text" readonly id="destination"><br>
+    Distance: <input type="text" readonly id="heading">Metres
+</div>
 <script type="text/javascript">initialize();</script>
 </body>
 </body>
 
 </html>
-
